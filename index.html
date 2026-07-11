@@ -181,6 +181,11 @@
     let objectUrl = null;
     let motionEnabled = false;
 
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (!isMobile) {
+      motionButton.style.display = "none";
+    }
+
     function showStatus(message) {
       status.textContent = message;
       status.style.display = "block";
@@ -241,12 +246,11 @@
 
         gyroscope = viewer.getPlugin(GyroscopePlugin);
 
-        viewer.addEventListener("gyroscope-updated", () => {
-          if (gyroscope) {
-            const enabled = gyroscope.isEnabled();
-            motionEnabled = enabled;
-            motionButton.textContent = enabled ? "關閉體感" : "開啟體感";
-          }
+        gyroscope.addEventListener("gyroscope-updated", () => {
+          const enabled = gyroscope.isEnabled();
+          motionEnabled = enabled;
+          motionButton.textContent = enabled ? "關閉體感" : "開啟體感";
+          showStatus(enabled ? "體感已開啟" : "體感已關閉");
         });
       } else {
         await viewer.setPanorama(objectUrl, {
@@ -278,7 +282,6 @@
       try {
         if (motionEnabled) {
           gyroscope.stop();
-          showStatus("體感已關閉");
           return;
         }
 
@@ -296,7 +299,6 @@
         }
 
         await gyroscope.start();
-        showStatus("體感已開啟");
       } catch (error) {
         console.error(error);
         showStatus("Safari 無法啟用體感");
