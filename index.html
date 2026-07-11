@@ -1,18 +1,13 @@
 <!doctype html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
 
   <title>360 全景預覽</title>
 
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.14.3/index.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.14.3/index.css" />
 
   <style>
     * {
@@ -125,6 +120,11 @@
       font-size: 14px;
       white-space: nowrap;
     }
+
+    .psv-navbar {
+      top: env(safe-area-inset-top, 0px) !important;
+      bottom: auto !important;
+    }
   </style>
 </head>
 
@@ -137,11 +137,7 @@
       <p>選擇一張 2:1 等距柱狀全景圖，圖片只在目前瀏覽器中處理。</p>
 
       <button id="chooseButton" class="button">選擇全景圖片</button>
-      <input
-        id="fileInput"
-        type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-      />
+      <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
     </div>
   </div>
 
@@ -298,4 +294,5 @@
     });
   </script>
 </body>
+
 </html>
