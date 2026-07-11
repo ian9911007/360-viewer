@@ -115,15 +115,25 @@
       background: #147efb;
       font-size: 17px;
       font-weight: 650;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
     #fileInput,
     #compareInput {
       position: absolute;
+      top: 0;
+      left: 0;
       width: 1px;
       height: 1px;
-      opacity: 0;
-      pointer-events: none;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     #dropHint {
@@ -155,7 +165,8 @@
       display: none;
     }
 
-    #toolbar button {
+    #toolbar button,
+    #toolbar label[for] {
       flex: 0 0 auto;
       min-height: 40px;
       padding: 0 13px;
@@ -165,14 +176,20 @@
       background: rgba(255, 255, 255, .08);
       font-size: 14px;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
     }
 
-    #toolbar button.active {
+    #toolbar button.active,
+    #toolbar label[for].active {
       background: #147efb;
       border-color: #147efb;
     }
 
-    #toolbar.collapsed button:not(#toggleToolbarButton) {
+    #toolbar.collapsed button:not(#toggleToolbarButton),
+    #toolbar.collapsed label[for] {
       display: none;
     }
 
@@ -382,7 +399,7 @@
     <div id="panel">
       <h1>360 Viewer</h1>
       <p>選擇一張 2:1 等距柱狀全景圖。圖片只在目前瀏覽器本機處理，不會上傳。</p>
-      <button id="chooseButton" class="primary">選擇全景圖片</button>
+      <label id="chooseButton" class="primary" for="fileInput">選擇全景圖片</label>
       <div id="dropHint">Mac 可直接拖放 JPEG、PNG、WebP、HEIC</div>
       <input id="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
       <input id="compareInput" type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" />
@@ -410,8 +427,8 @@
     <button data-look="nadir">底部</button>
     <button id="seamButton">接縫</button>
     <button id="gridButton">格線</button>
-    <button id="compareButton">比較</button>
-    <button id="changeButton">換圖</button>
+    <label id="compareButton" for="compareInput">比較</label>
+    <label id="changeButton" for="fileInput">換圖</label>
     <button id="fullscreenButton">全螢幕</button>
     <button id="infoButton">資訊</button>
     <button id="shareButton">分享</button>
@@ -480,7 +497,6 @@
       }
     }
 
-    function openPicker(target = els.file) { target.click(); }
     els.file.addEventListener("click", (e) => { e.target.value = ""; });
     els.compareFile.addEventListener("click", (e) => { e.target.value = ""; });
 
@@ -595,8 +611,6 @@
       } finally { URL.revokeObjectURL(url); }
     }
 
-    $("#chooseButton").addEventListener("click", () => openPicker());
-    $("#changeButton").addEventListener("click", () => openPicker());
     els.file.addEventListener("change", () => els.file.files?.[0] && loadPrimary(els.file.files[0]));
     els.compareFile.addEventListener("change", () => els.compareFile.files?.[0] && loadCompare(els.compareFile.files[0]));
 
@@ -646,10 +660,13 @@
       $("#seamButton").classList.toggle("active", seamEnabled);
     });
 
-    $("#compareButton").addEventListener("click", () => {
-      if (!compareEnabled) { openPicker(els.compareFile); return; }
-      compareEnabled = false; document.body.classList.remove("compare");
-      $("#compareButton").classList.remove("active");
+    $("#compareButton").addEventListener("click", (e) => {
+      if (compareEnabled) {
+        e.preventDefault();
+        compareEnabled = false;
+        document.body.classList.remove("compare");
+        $("#compareButton").classList.remove("active");
+      }
     });
 
     $("#fullscreenButton").addEventListener("click", async () => {
