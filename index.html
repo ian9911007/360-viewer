@@ -467,6 +467,15 @@
       toast.timer = setTimeout(() => { els.status.style.display = "none"; }, 2600);
     }
 
+    function cancelMotion() {
+      if (motionEnabled && gyroscope) {
+        gyroscope.stop();
+        motionEnabled = false;
+        $("#motionButton").classList.remove("active");
+        toast("已關閉體感");
+      }
+    }
+
     function openPicker(target = els.file) { target.value = ""; target.click(); }
 
     function zoomForFov(fov) {
@@ -534,12 +543,7 @@
           viewer = createViewer(els.viewer, primaryUrl);
           gyroscope = viewer.getPlugin(GyroscopePlugin);
           els.viewer.addEventListener("pointerdown", () => {
-            if (motionEnabled && gyroscope) {
-              gyroscope.stop();
-              motionEnabled = false;
-              $("#motionButton").classList.remove("active");
-              toast("已關閉體感");
-            }
+            cancelMotion();
             $$("[data-angle], [data-look]").forEach((b) => b.classList.remove("active"));
           }, { capture: true, passive: true });
         } else {
@@ -591,6 +595,7 @@
     els.compareFile.addEventListener("change", () => els.compareFile.files?.[0] && loadCompare(els.compareFile.files[0]));
 
     $$("[data-angle]").forEach((button) => button.addEventListener("click", () => {
+      cancelMotion();
       const angle = Number(button.dataset.angle);
       const yaw = angle * Math.PI / 180;
       viewer?.animate({ yaw, pitch: 0, speed: "2rpm" });
@@ -659,6 +664,7 @@
     $("#closeDrawer").addEventListener("click", () => els.drawer.classList.remove("open"));
 
     $$("[data-look]").forEach((button) => button.addEventListener("click", () => {
+      cancelMotion();
       const target = button.dataset.look;
       const pitch = target === "zenith" ? Math.PI / 2 : target === "nadir" ? -Math.PI / 2 : 0;
       viewer?.animate({ yaw: 0, pitch, speed: "2rpm" });
