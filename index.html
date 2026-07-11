@@ -240,6 +240,14 @@
         });
 
         gyroscope = viewer.getPlugin(GyroscopePlugin);
+
+        viewer.addEventListener("gyroscope-updated", () => {
+          if (gyroscope) {
+            const enabled = gyroscope.isEnabled();
+            motionEnabled = enabled;
+            motionButton.textContent = enabled ? "關閉體感" : "開啟體感";
+          }
+        });
       } else {
         await viewer.setPanorama(objectUrl, {
           transition: false,
@@ -251,11 +259,12 @@
         });
       }
 
+      if (gyroscope) {
+        gyroscope.stop();
+      }
+
       startScreen.style.display = "none";
       controls.style.display = "flex";
-
-      motionEnabled = false;
-      motionButton.textContent = "開啟體感";
 
       showStatus("全景圖片已載入");
     });
@@ -269,8 +278,6 @@
       try {
         if (motionEnabled) {
           gyroscope.stop();
-          motionEnabled = false;
-          motionButton.textContent = "開啟體感";
           showStatus("體感已關閉");
           return;
         }
@@ -289,9 +296,6 @@
         }
 
         await gyroscope.start();
-
-        motionEnabled = true;
-        motionButton.textContent = "關閉體感";
         showStatus("體感已開啟");
       } catch (error) {
         console.error(error);
