@@ -119,7 +119,11 @@
 
     #fileInput,
     #compareInput {
-      display: none;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     #dropHint {
@@ -476,7 +480,9 @@
       }
     }
 
-    function openPicker(target = els.file) { target.value = ""; target.click(); }
+    function openPicker(target = els.file) { target.click(); }
+    els.file.addEventListener("click", (e) => { e.target.value = ""; });
+    els.compareFile.addEventListener("click", (e) => { e.target.value = ""; });
 
     function zoomForFov(fov) {
       const minFov = 30, maxFov = 120;
