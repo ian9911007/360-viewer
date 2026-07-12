@@ -433,6 +433,7 @@
   <div id="dropOverlay">放開以載入全景圖</div>
   
   <div id="zoomControl">
+    <div id="zoomVal" style="font-size: 13px; font-weight: 750; color: #fff; margin-bottom: 2px; font-family: ui-monospace, monospace;">35mm</div>
     <div class="zoom-label">望遠</div>
     <input id="zoomSlider" type="range" min="0" max="100" step="0.5" />
     <div class="zoom-label">廣角</div>
@@ -611,9 +612,7 @@
 
           viewer.addEventListener("zoom-updated", ({ zoomLevel }) => {
             if (els.zoomSlider) els.zoomSlider.value = zoomLevel;
-            const minFov = 30, maxFov = 120;
-            const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
-            localStorage.setItem("360lab-fov", currentFov);
+            updateZoomVal(zoomLevel);
 
             if (compareViewer && compareEnabled) {
               if (Math.abs(compareViewer.getZoomLevel() - zoomLevel) > 0.1) {
@@ -650,9 +649,7 @@
           
           compareViewer.addEventListener("zoom-updated", ({ zoomLevel }) => {
             if (els.zoomSlider) els.zoomSlider.value = zoomLevel;
-            const minFov = 30, maxFov = 120;
-            const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
-            localStorage.setItem("360lab-fov", currentFov);
+            updateZoomVal(zoomLevel);
 
             if (viewer) {
               if (Math.abs(viewer.getZoomLevel() - zoomLevel) > 0.1) {
@@ -790,16 +787,26 @@
       $("#toolbar").classList.toggle("collapsed");
     });
 
+    function updateZoomVal(zoomLevel) {
+      const minFov = 30, maxFov = 120;
+      const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
+      localStorage.setItem("360lab-fov", currentFov);
+      const mm = 12 / Math.tan((currentFov * Math.PI) / 360);
+      const zoomValEl = $("#zoomVal");
+      if (zoomValEl) {
+        zoomValEl.textContent = `${Math.round(mm)}mm`;
+      }
+    }
+
     if (els.zoomSlider) {
-      els.zoomSlider.value = zoomForFov(savedFov);
+      const defaultZoom = zoomForFov(savedFov);
+      els.zoomSlider.value = defaultZoom;
+      updateZoomVal(defaultZoom);
       els.zoomSlider.addEventListener("input", (e) => {
         const val = Number(e.target.value);
         viewer?.zoom(val);
         compareViewer?.zoom(val);
-        
-        const minFov = 30, maxFov = 120;
-        const currentFov = maxFov - (val / 100) * (maxFov - minFov);
-        localStorage.setItem("360lab-fov", currentFov);
+        updateZoomVal(val);
       });
     }
   </script>
