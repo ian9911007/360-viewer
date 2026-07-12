@@ -546,7 +546,7 @@
     els.compareFile.addEventListener("click", (e) => { e.target.value = ""; });
 
     function zoomForFov(fov) {
-      const minFov = 30, maxFov = 120;
+      const minFov = 13.7, maxFov = 120;
       return Math.max(0, Math.min(100, ((maxFov - fov) / (maxFov - minFov)) * 100));
     }
 
@@ -575,7 +575,7 @@
         defaultYaw: 0,
         defaultPitch: 0,
         defaultZoomLvl: zoomForFov(savedFov),
-        minFov: 30,
+        minFov: 13.7,
         maxFov: 120,
         mousewheelCtrlKey: false,
         touchmoveTwoFingers: false,
@@ -788,7 +788,7 @@
     });
 
     function updateZoomVal(zoomLevel) {
-      const minFov = 30, maxFov = 120;
+      const minFov = 13.7, maxFov = 120;
       const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
       localStorage.setItem("360lab-fov", currentFov);
       const mm = 12 / Math.tan((currentFov * Math.PI) / 360);
