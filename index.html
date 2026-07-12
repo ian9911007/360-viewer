@@ -552,7 +552,7 @@
       if (mm <= 20) {
         return Math.max(0, Math.min(50, ((mm - 7) / (20 - 7)) * 50));
       } else {
-        return Math.max(50, Math.min(100, 50 + ((mm - 20) / (100 - 20)) * 50));
+        return Math.max(50, Math.min(100, 50 + ((mm - 20) / (99 - 20)) * 50));
       }
     }
 
@@ -581,7 +581,7 @@
         defaultYaw: 0,
         defaultPitch: 0,
         defaultZoomLvl: zoomForFov(savedFov),
-        minFov: 13.7,
+        minFov: 13.8,
         maxFov: 120,
         mousewheelCtrlKey: false,
         touchmoveTwoFingers: false,
@@ -798,7 +798,7 @@
       if (zoomLevel <= 50) {
         mm = 7 + (zoomLevel / 50) * (20 - 7);
       } else {
-        mm = 20 + ((zoomLevel - 50) / 50) * (100 - 20);
+        mm = 20 + ((zoomLevel - 50) / 50) * (99 - 20);
       }
 
       const currentFov = 2 * Math.atan(12 / mm) * 180 / Math.PI;
