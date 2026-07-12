@@ -431,9 +431,11 @@
   <div id="divider"></div>
   <div id="grid"></div>
   <div id="dropOverlay">放開以載入全景圖</div>
-  
+
   <div id="zoomControl">
-    <div id="zoomVal" style="font-size: 13px; font-weight: 750; color: #fff; margin-bottom: 2px; font-family: ui-monospace, monospace;">35mm</div>
+    <div id="zoomVal"
+      style="font-size: 13px; font-weight: 750; color: #fff; margin-bottom: 2px; font-family: ui-monospace, monospace;">
+      35mm</div>
     <div class="zoom-label">望遠</div>
     <input id="zoomSlider" type="range" min="0" max="100" step="0.5" />
     <div class="zoom-label">廣角</div>
@@ -650,7 +652,7 @@
         compareUrl = URL.createObjectURL(file);
         if (!compareViewer) {
           compareViewer = createViewer(els.compareViewer, compareUrl);
-          
+
           compareViewer.addEventListener("zoom-updated", ({ zoomLevel }) => {
             if (els.zoomSlider) els.zoomSlider.value = zoomLevel;
             updateZoomVal(zoomLevel);
@@ -798,10 +800,10 @@
       } else {
         mm = 20 + ((zoomLevel - 50) / 50) * (100 - 20);
       }
-      
+
       const currentFov = 2 * Math.atan(12 / mm) * 180 / Math.PI;
       localStorage.setItem("360lab-fov", currentFov);
-      
+
       const zoomValEl = $("#zoomVal");
       if (zoomValEl) {
         const mmRound = Math.round(mm);
@@ -814,16 +816,16 @@
       const defaultZoom = zoomForFov(savedFov);
       els.zoomSlider.value = defaultZoom;
       updateZoomVal(defaultZoom);
-      
+
       els.zoomSlider.addEventListener("input", (e) => {
         let val = Number(e.target.value);
-        
+
         // 接近 50 (47 到 53 之間) 時，自動吸附至 50 (20mm)
         if (val >= 47 && val <= 53) {
           val = 50;
           els.zoomSlider.value = 50;
         }
-        
+
         viewer?.zoom(val);
         compareViewer?.zoom(val);
         updateZoomVal(val);
@@ -831,7 +833,7 @@
 
       els.zoomSlider.addEventListener("change", (e) => {
         let val = Number(e.target.value);
-        
+
         // 點擊或放開時，若在 45 到 55 之間，自動吸附回到 50 (20mm)
         if (val >= 45 && val <= 55) {
           val = 50;
