@@ -385,6 +385,43 @@
         min-height: 42px;
       }
     }
+
+    #zoomControl {
+      position: fixed;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 8px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .24);
+      user-select: none;
+    }
+
+    #zoomSlider {
+      -webkit-appearance: slider-vertical;
+      appearance: slider-vertical;
+      width: 12px;
+      height: 180px;
+      background: transparent;
+      cursor: pointer;
+      margin: 4px 0;
+    }
+
+    .zoom-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, .72);
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -394,6 +431,12 @@
   <div id="divider"></div>
   <div id="grid"></div>
   <div id="dropOverlay">放開以載入全景圖</div>
+  
+  <div id="zoomControl">
+    <div class="zoom-label">望遠</div>
+    <input id="zoomSlider" type="range" min="0" max="100" step="0.5" />
+    <div class="zoom-label">廣角</div>
+  </div>
 
   <div id="startScreen">
     <div id="panel">
@@ -474,12 +517,13 @@
     const $$ = (s) => [...document.querySelectorAll(s)];
     const els = {
       viewer: $("#viewer"), compareViewer: $("#compareViewer"), start: $("#startScreen"), toolbar: $("#toolbar"),
-      status: $("#status"), file: $("#fileInput"), compareFile: $("#compareInput"), drawer: $("#drawer"), meta: $("#meta")
+      status: $("#status"), file: $("#fileInput"), compareFile: $("#compareInput"), drawer: $("#drawer"), meta: $("#meta"),
+      zoomSlider: $("#zoomSlider")
     };
 
     let viewer, compareViewer, gyroscope, primaryUrl, compareUrl, originalFile, seamUrl;
     let motionEnabled = false, compareEnabled = false, seamEnabled = false;
-    const savedFov = Number(localStorage.getItem("360lab-fov") || 90);
+    const savedFov = Number(localStorage.getItem("360lab-fov") || 38);
 
     function toast(message) {
       els.status.textContent = message;
@@ -564,6 +608,20 @@
         if (!viewer) {
           viewer = createViewer(els.viewer, primaryUrl);
           gyroscope = viewer.getPlugin(GyroscopePlugin);
+
+          viewer.addEventListener("zoom-updated", ({ zoomLevel }) => {
+            if (els.zoomSlider) els.zoomSlider.value = zoomLevel;
+            const minFov = 30, maxFov = 120;
+            const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
+            localStorage.setItem("360lab-fov", currentFov);
+
+            if (compareViewer && compareEnabled) {
+              if (Math.abs(compareViewer.getZoomLevel() - zoomLevel) > 0.1) {
+                compareViewer.zoom(zoomLevel);
+              }
+            }
+          });
+
           els.viewer.addEventListener("pointerdown", () => {
             cancelMotion();
             $$("[data-angle], [data-look]").forEach((b) => b.classList.remove("active"));
@@ -587,7 +645,22 @@
         const d = await validate(file);
         if (compareUrl) URL.revokeObjectURL(compareUrl);
         compareUrl = URL.createObjectURL(file);
-        if (!compareViewer) compareViewer = createViewer(els.compareViewer, compareUrl);
+        if (!compareViewer) {
+          compareViewer = createViewer(els.compareViewer, compareUrl);
+          
+          compareViewer.addEventListener("zoom-updated", ({ zoomLevel }) => {
+            if (els.zoomSlider) els.zoomSlider.value = zoomLevel;
+            const minFov = 30, maxFov = 120;
+            const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
+            localStorage.setItem("360lab-fov", currentFov);
+
+            if (viewer) {
+              if (Math.abs(viewer.getZoomLevel() - zoomLevel) > 0.1) {
+                viewer.zoom(zoomLevel);
+              }
+            }
+          });
+        }
         else await compareViewer.setPanorama(compareUrl, { transition: false });
         compareEnabled = true;
         document.body.classList.add("compare");
@@ -716,6 +789,19 @@
     $("#toggleToolbarButton").addEventListener("click", () => {
       $("#toolbar").classList.toggle("collapsed");
     });
+
+    if (els.zoomSlider) {
+      els.zoomSlider.value = zoomForFov(savedFov);
+      els.zoomSlider.addEventListener("input", (e) => {
+        const val = Number(e.target.value);
+        viewer?.zoom(val);
+        compareViewer?.zoom(val);
+        
+        const minFov = 30, maxFov = 120;
+        const currentFov = maxFov - (val / 100) * (maxFov - minFov);
+        localStorage.setItem("360lab-fov", currentFov);
+      });
+    }
   </script>
 </body>
 

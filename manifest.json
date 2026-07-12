@@ -1,6 +1,6 @@
 {
-  "name": "360 Lab",
-  "short_name": "360 Lab",
+  "name": "360 Viewer",
+  "short_name": "360 Viewer",
   "start_url": "./",
   "scope": "./",
   "display": "fullscreen",
