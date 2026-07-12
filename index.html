@@ -526,7 +526,7 @@
 
     let viewer, compareViewer, gyroscope, primaryUrl, compareUrl, originalFile, seamUrl;
     let motionEnabled = false, compareEnabled = false, seamEnabled = false;
-    const savedFov = Number(localStorage.getItem("360lab-fov") || 61.92);
+    const savedFov = Number(localStorage.getItem("360lab-fov-v2") || 61.92);
 
     function toast(message) {
       els.status.textContent = message;
@@ -802,7 +802,7 @@
       }
 
       const currentFov = 2 * Math.atan(12 / mm) * 180 / Math.PI;
-      localStorage.setItem("360lab-fov", currentFov);
+      localStorage.setItem("360lab-fov-v2", currentFov);
 
       const zoomValEl = $("#zoomVal");
       if (zoomValEl) {
