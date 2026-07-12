@@ -524,7 +524,7 @@
 
     let viewer, compareViewer, gyroscope, primaryUrl, compareUrl, originalFile, seamUrl;
     let motionEnabled = false, compareEnabled = false, seamEnabled = false;
-    const savedFov = Number(localStorage.getItem("360lab-fov") || 38);
+    const savedFov = Number(localStorage.getItem("360lab-fov") || 61.92);
 
     function toast(message) {
       els.status.textContent = message;
@@ -546,8 +546,12 @@
     els.compareFile.addEventListener("click", (e) => { e.target.value = ""; });
 
     function zoomForFov(fov) {
-      const minFov = 13.7, maxFov = 120;
-      return Math.max(0, Math.min(100, ((maxFov - fov) / (maxFov - minFov)) * 100));
+      const mm = 12 / Math.tan((fov * Math.PI) / 360);
+      if (mm <= 20) {
+        return Math.max(0, Math.min(50, ((mm - 7) / (20 - 7)) * 50));
+      } else {
+        return Math.max(50, Math.min(100, 50 + ((mm - 20) / (100 - 20)) * 50));
+      }
     }
 
     async function dimensions(file) {
@@ -788,10 +792,16 @@
     });
 
     function updateZoomVal(zoomLevel) {
-      const minFov = 13.7, maxFov = 120;
-      const currentFov = maxFov - (zoomLevel / 100) * (maxFov - minFov);
+      let mm;
+      if (zoomLevel <= 50) {
+        mm = 7 + (zoomLevel / 50) * (20 - 7);
+      } else {
+        mm = 20 + ((zoomLevel - 50) / 50) * (100 - 20);
+      }
+      
+      const currentFov = 2 * Math.atan(12 / mm) * 180 / Math.PI;
       localStorage.setItem("360lab-fov", currentFov);
-      const mm = 12 / Math.tan((currentFov * Math.PI) / 360);
+      
       const zoomValEl = $("#zoomVal");
       if (zoomValEl) {
         zoomValEl.textContent = `${Math.round(mm)}mm`;
@@ -802,11 +812,32 @@
       const defaultZoom = zoomForFov(savedFov);
       els.zoomSlider.value = defaultZoom;
       updateZoomVal(defaultZoom);
+      
       els.zoomSlider.addEventListener("input", (e) => {
-        const val = Number(e.target.value);
+        let val = Number(e.target.value);
+        
+        // 接近 50 (47 到 53 之間) 時，自動吸附至 50 (20mm)
+        if (val >= 47 && val <= 53) {
+          val = 50;
+          els.zoomSlider.value = 50;
+        }
+        
         viewer?.zoom(val);
         compareViewer?.zoom(val);
         updateZoomVal(val);
+      });
+
+      els.zoomSlider.addEventListener("change", (e) => {
+        let val = Number(e.target.value);
+        
+        // 點擊或放開時，若在 45 到 55 之間，自動吸附回到 50 (20mm)
+        if (val >= 45 && val <= 55) {
+          val = 50;
+          els.zoomSlider.value = 50;
+          viewer?.zoom(val);
+          compareViewer?.zoom(val);
+          updateZoomVal(val);
+        }
       });
     }
   </script>
